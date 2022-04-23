@@ -32,9 +32,18 @@ router.get("/find/:id", async (req, res) => {
 // GET ALL products
 
 router.get("/", async (req, res) => {
+    const querCategory = req.query.category;
     try{
         let products
-        products = await Product.find()
+        if(querCategory){
+            products = await Product.find({categories:{
+                $in: [querCategory],
+            },
+        });
+        }else{
+            products = await Product.find()
+
+        }
         res.status(200).json(products)
 
     }catch(err) {
