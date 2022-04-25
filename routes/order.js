@@ -1,14 +1,36 @@
 const router = require("express").Router();
-const Order = require("../models/Order");
+const cartPriceSchema = require("../models/Order");
+const Order = cartPriceSchema;
+
+
+
 
 // CREATE SHOPPING Order 
 router.post("/", async (req, res) => {
 
     const newOrder = new Order(req.body)
+    // const totalPrice = 0
 
     try {
         const savedOrder = await newOrder.save()
-        res.status(200).json(savedOrder)
+
+        
+        totalPrice = 0
+        const subtotalPrice = savedOrder.products.forEach(product => {
+                    const total = product.prodQuantity * product.price
+                    totalPrice += total
+                });
+         if(totalPrice > 60) totalPrice -= 8 //shipping discount
+         await Order.updateOne({_id: savedOrder["_id"]},
+            {
+             $set: {totalP: totalPrice}
+         })
+         
+            
+         res.status(200).json(totalPrice)
+         console.log(savedOrder["_id"], "<< post res")
+         console.log(savedOrder.totalP, '<totalP')
+    
 
     }catch(err){
         res.status(500).json(err)
